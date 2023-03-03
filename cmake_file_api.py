@@ -8,6 +8,7 @@ https://cmake.org/cmake/help/latest/manual/cmake-file-api.7.html
 
 from __future__ import annotations
 from pathlib import Path
+import typing as T
 from dataclasses import dataclass
 import shutil
 import subprocess
@@ -54,21 +55,20 @@ class Cmake:
         gen_cmd += [f"-S{self.source_dir}", f"-B{self.build_dir}"]
         subprocess.check_call(gen_cmd)
 
-    def get_index(self) -> dict[str, str]:
+    def get_reply(self) -> dict[str, str]:
         """get index of CMake file-api reply files"""
 
         self.generate()
         indices = sorted(self.resp_dir.glob("index-*.json"))
 
-        return json.loads(indices[-1].read_text())
+        return json.loads(indices[-1].read_text())["reply"]
 
     def get_cache(self) -> dict[str, str]:
         """get CMake cache as dict"""
 
         (self.query_dir / "cache-v2").touch()
 
-        index = self.get_index()
-        cache_fn = self.resp_dir / index["reply"]["cache-v2"]["jsonFile"]
+        cache_fn = self.resp_dir / self.get_reply()["cache-v2"]["jsonFile"]
 
         return json.loads(cache_fn.read_text())
 
@@ -77,20 +77,14 @@ class Cmake:
 
         (self.query_dir / "codemodel-v2").touch()
 
-        index = self.get_index()
-        codemodel_fn = self.resp_dir / index["reply"]["codemodel-v2"]["jsonFile"]
+        codemodel_fn = self.resp_dir / self.get_reply()["codemodel-v2"]["jsonFile"]
 
-        codemodel = json.loads(codemodel_fn.read_text())
+        return json.loads(codemodel_fn.read_text())
 
-        return codemodel
+    def get_target_jsonFiles(self) -> T.Iterator[str]:
+        """get target JSON index files"""
 
-    def get_target_jsonFiles(self) -> list[str]:
-        """get list of target JSON index files"""
-
-        codemodel = self.get_codemodel()
-        targets = [target["jsonFile"] for target in codemodel["configurations"][0]["targets"]]
-
-        return targets
+        return (target["jsonFile"] for target in self.get_codemodel()["configurations"][0]["targets"])
 
 
 if __name__ == "__main__":
