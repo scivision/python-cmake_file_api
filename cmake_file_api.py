@@ -15,6 +15,10 @@ import subprocess
 import argparse
 import json
 from pprint import pprint
+import sys
+
+if sys.version_info < (3, 8):
+    raise RuntimeError("Python >= 3.8 required")
 
 
 @dataclass
