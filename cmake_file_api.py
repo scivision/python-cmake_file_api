@@ -34,9 +34,9 @@ class Cmake:
         else:
             raise FileNotFoundError("CMake executable not found")
 
-        self.source_dir = Path(source_dir).expanduser().resolve() if source_dir else Path.cwd()
+        self.source_dir = Path(source_dir).expanduser().resolve(strict=True) if source_dir else Path.cwd()
 
-        self.build_dir = Path(build_dir).expanduser().resolve() if build_dir else self.source_dir / "build"
+        self.build_dir = Path(build_dir).expanduser().resolve(strict=False) if build_dir else self.source_dir / "build"
 
         self.api_dir = self.build_dir / ".cmake/api/v1"
         self.query_dir = self.api_dir / "query"
