@@ -59,7 +59,7 @@ class Cmake:
         gen_cmd += [f"-S{self.source_dir}", f"-B{self.build_dir}"]
         subprocess.check_call(gen_cmd)
 
-    def get_reply(self) -> dict[str, str]:
+    def get_reply(self) -> dict[str, dict[str, str]]:
         """get index of CMake file-api reply files"""
 
         self.generate()
@@ -67,7 +67,7 @@ class Cmake:
 
         return json.loads(indices[-1].read_text())["reply"]
 
-    def get_cache(self) -> dict[str, str]:
+    def get_cache(self) -> dict[str, dict[str, str]]:
         """get CMake cache as dict"""
 
         (self.query_dir / "cache-v2").touch()
@@ -76,7 +76,7 @@ class Cmake:
 
         return json.loads(cache_fn.read_text())
 
-    def get_codemodel(self) -> dict[str, str]:
+    def get_codemodel(self) -> dict[str, list[dict]]:
         """get CMake codemodel as dict"""
 
         (self.query_dir / "codemodel-v2").touch()
