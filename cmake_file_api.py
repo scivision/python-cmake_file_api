@@ -12,9 +12,7 @@ import typing as T
 from dataclasses import dataclass
 import shutil
 import subprocess
-import argparse
 import json
-from pprint import pprint
 import sys
 
 if sys.version_info < (3, 8):
@@ -40,7 +38,9 @@ class Cmake:
 
         self.source_dir = Path(source_dir).expanduser().resolve(strict=True) if source_dir else Path.cwd()
 
-        self.build_dir = Path(build_dir).expanduser().resolve(strict=False) if build_dir else self.source_dir / "build"
+        self.build_dir = (
+            Path(build_dir).expanduser().resolve(strict=False) if build_dir else self.source_dir / "build"
+        )
 
         self.api_dir = self.build_dir / ".cmake/api/v1"
         self.query_dir = self.api_dir / "query"
@@ -89,21 +89,3 @@ class Cmake:
         """get target JSON index files"""
 
         return (target["jsonFile"] for target in self.get_codemodel()["configurations"][0]["targets"])
-
-
-if __name__ == "__main__":
-    p = argparse.ArgumentParser()
-    p.add_argument("source_dir", help="Top level source directory of CMake project")
-    P = p.parse_args()
-
-    cmake = Cmake(P.source_dir)
-
-    # cache = cmake.get_cache()
-    # pprint(cache)
-
-    # codemodel = cmake.get_codemodel()
-    # pprint(codemodel)
-
-    for file in cmake.get_target_jsonFiles():
-        target = json.loads((cmake.resp_dir / file).read_text())
-        pprint(target)
